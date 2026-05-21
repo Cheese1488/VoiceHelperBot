@@ -1,7 +1,17 @@
-import soundcard, pyaudio, speech_recognition, os, json, sys, pyautogui, random
-from openai import OpenAI
+import soundcard, pyaudio, speech_recognition, os, json, sys, pyautogui, random, requests
 
 import win32com.client
+
+def ask_ai(history):
+    server_url = "https://heartfelt-nourishment-production-9ff3.up.railway.app/chat"
+    try:
+        resp = requests.post(server_url, json={"messages": history}, timeout=30)
+        if resp.status_code == 200:
+            return resp.json()["reply"]
+        else:
+            return f"Ошибка сервера: {resp.json().get('error', 'Неизвестная ошибка')}"
+    except Exception as e:
+        return f"Ошибка связи с сервером: {e}"
 
 def get_answer(words, engine):
     prot = True
@@ -25,8 +35,9 @@ def get_answer(words, engine):
     elif "Сменить микрофон" in words or "смени микрофон" in words:
         commandIndex = 3
     elif "удали историю" in words:
-        if os.path.exists('AiHistory.json'):
-            os.remove('AiHistory.json')
+        ai_history_path = os.path.join(get_script_dir(), 'AiHistory.json')
+        if os.path.exists(ai_history_path):
+            os.remove(ai_history_path)
             print("BOT: История удалена.")
             engine.speak("История удалена.")
         else:
@@ -72,9 +83,14 @@ def get_script_dir():
     
 
 if __name__ == '__main__':
-    with open(os.path.join(get_script_dir(), 'config.json'), 'r', encoding='utf-8') as f:
+    config_path = os.path.join(get_script_dir(), 'config.json')
+    if not os.path.exists(config_path):
+        with open(config_path, 'w', encoding='utf-8') as f:
+            json.dump({"apps": {}}, f, indent=4)
+
+    with open(config_path, 'r', encoding='utf-8') as f:
         config = json.load(f)
-    client = OpenAI(api_key=config["openai_api_key"], base_url="https://openrouter.ai/api/v1")
+
     rec = speech_recognition.Recognizer()
     engine = win32com.client.Dispatch("SAPI.SpVoice")
     microphones = soundcard.all_microphones()
@@ -103,27 +119,25 @@ if __name__ == '__main__':
                     else:
                         appSite = ""
 
-                    
-                    with open(os.path.join(get_script_dir(), 'config.json'), 'r', encoding='utf-8') as f:
-                        data = json.load(f)
-                        try:
-                            if appSite in data["apps"]:
-                                app = data["apps"][appSite]
-                                print(f"BOT: Открываю: {appSite}")
-                                engine.speak(f"Открываю: {appSite}")
-                                os.startfile(app)
-                            else:
-                                print(f"BOT: Открываю: {appSite}")
-                                engine.speak(f"Открываю: {appSite}")
-                                try:
-                                    os.startfile(str.lower(appSite) + "://")
-                                except Exception as e:
-                                    print(f"BOT: Неизвестное приложение или сайт: {appSite}")
-                                    engine.speak(f"BOT: Неизвестное приложение или сайт: {appSite}")
+                    try:
+                        if appSite in config["apps"]:
+                            app = config["apps"][appSite]
+                            print(f"BOT: Открываю: {appSite}")
+                            engine.speak(f"Открываю: {appSite}")
+                            print(f"{app}")
+                            os.startfile(app)
+                        else:
+                            print(f"BOT: Открываю: {appSite}")
+                            engine.speak(f"Открываю: {appSite}")
+                            try:
+                                os.startfile(str.lower(appSite) + "://")
+                            except Exception as e:
+                                print(f"BOT: Неизвестное приложение или сайт: {appSite}")
+                                engine.speak(f"BOT: Неизвестное приложение или сайт: {appSite}")
 
-                        except Exception as e:
-                            print(f"Ошибка: {e}")
-                            engine.speak(f"Ошибка: {e}")
+                    except Exception as e:
+                        print(f"Ошибка: {e}")
+                        engine.speak(f"Ошибка: {e}")
                 elif commandIndex == 3:
                     print("BOT: Смена микрофона")
                     engine.speak("Смена микрофона")
@@ -147,38 +161,33 @@ if __name__ == '__main__':
                     print(f"BOT: Закрываю открытое окно")
                     engine.speak(f"Закрываю открытое окно")
                 elif commandIndex == 5:
+                    ai_history_path = os.path.join(get_script_dir(), 'AiHistory.json')
                     try:
-                        if not os.path.exists('AiHistory.json') or os.path.getsize('AiHistory.json') == 0:
+                        if not os.path.exists(ai_history_path) or os.path.getsize(ai_history_path) == 0:
                             history = [{"role": "system", "content": "Ты — участник диалога. Отвечай кратко и естественно."}]
-                            with open(os.path.join(get_script_dir(), 'AiHistory.json'), 'w', encoding='utf-8') as f:
+                            with open(ai_history_path, 'w', encoding='utf-8') as f:
                                 json.dump(history, f, ensure_ascii=False, indent=2)
                         else:
-                            with open(os.path.join(get_script_dir(), 'AiHistory.json'), 'r', encoding='utf-8') as f:
+                            with open(ai_history_path, 'r', encoding='utf-8') as f:
                                 try:
                                     history = json.load(f)
                                 except json.JSONDecodeError:
-                                    # Файл повреждён — пересоздаём
                                     print("История повреждена, создаю новую...")
                                     engine.speak("История повреждена, создаю новую...")
                                     history = [{"role": "system", "content": "Ты — участник диалога. Отвечай кратко и естественно."}]
-                                    with open(os.path.join(get_script_dir(), 'AiHistory.json'), 'w', encoding='utf-8') as fw:
+                                    with open(ai_history_path, 'w', encoding='utf-8') as fw:
                                         json.dump(history, fw, ensure_ascii=False, indent=2)
 
                         history.append({"role": "user", "content": words})
 
-                        result = client.chat.completions.create(
-                            model="openai/gpt-oss-120b:free",
-                            messages=history
-                        )
-
-                        assistant_reply = result.choices[0].message.content
+                        assistant_reply = ask_ai(history)
 
                         history.append({"role": "assistant", "content": assistant_reply})
 
                         if len(history) > 50:
                             history = [history[0]] + history[-49:]
 
-                        with open(os.path.join(get_script_dir(), 'AiHistory.json'), 'w', encoding='utf-8') as f:
+                        with open(ai_history_path, 'w', encoding='utf-8') as f:
                             json.dump(history, f, ensure_ascii=False, indent=2)
 
                         print(f"BOT: {assistant_reply}")
