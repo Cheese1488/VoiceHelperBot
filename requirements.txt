@@ -1,4 +1,3 @@
-# requirements.txt
 flask
 gunicorn
 openai
