@@ -14,7 +14,7 @@ This is just voice bot for your use!
 > | `Сменить микрофон`, `смени микрофон` | Switch microphone (if it's broken yout input: enter to path of bot, open "Settings.json", switch number to 0) |
 > | `Удали историю` | Delete your AI talkink history |
 > | `Пока` | Close bot |
-> | `Cменить имя`, `смени имя`, `изменить имя`, `измени имя` | Bot change name ("бот" => "Вектор") |
+> | `Cменить имя`, `смени имя`, `изменить имя`, `измени имя` | Bot change name you can also set several names at once just by writing the names separated by a space without any other characters (бот => Вектор Квас роса) |
 > | `Cпящий режим`, `включи спящий режим` | Your computer will go to sleep mode. |
 > | `отмена`, `отмени` | Cancel your command if you start but don't end give command (example: {YouerBotName}(бот) как меня зовут отмена) - this command will not work |
 
