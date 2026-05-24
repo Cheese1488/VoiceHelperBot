@@ -29,4 +29,4 @@ This is just voice bot for your use!
 # All suported languages: 
 - RU
 
-### Bot version: 1.2.2v Alpha
+### Bot version: 1.1.3v Alpha
