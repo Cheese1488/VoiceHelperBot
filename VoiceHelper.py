@@ -1,4 +1,5 @@
-import soundcard, speech_recognition, os, json, sys, pyautogui, random, requests, platform, threading
+import soundcard, speech_recognition, os, json, sys, pyautogui, random, requests, platform, threading, pygetwindow
+from datetime import date
 import win32com.client
 
 def ask_ai(history):
@@ -30,9 +31,33 @@ def get_answer(words, engine):
         commandIndex = 2
 
     elif "привет" in words:
-        print("BOT: Привет!")
-        speak_interruptible("Привет!", mic_index, engine)
-        commandIndex = 1
+        phrases = [
+                "Приветствую!",
+                "Привет!",
+                "Рад тебя слышать!",
+                "Здравствуй!",
+                "Приветствую тебя!",
+                "Приветствую, как я могу помочь?",
+                "Приветствую, чем могу помочь?",
+                "Приветствую, что у тебя на уме?",
+                "Приветствую, что ты хочешь?",
+                "Приветствую, что тебе нужно?",
+            ]
+        chosen = random.choice(phrases)
+        print(chosen)
+        speak_interruptible(chosen, mic_index, engine)
+
+    elif "спасибо" in words or "благодарю" in words or "благодарствую" in words or "спасибки" in words or "спасибочки" in words or "ещё раз спасибо" in words:
+        pharases = [
+            "Пожалуйста!",
+            "Не за что!",
+            "Рад помочь!",
+            "Всегда пожалуйста!",
+            "Обращайтесь, если что-то понадобится!"
+        ]
+        chosen = random.choice(pharases)
+        print(f"BOT: {chosen}")
+        speak_interruptible(chosen, mic_index, engine)
 
     elif "закрой окно" in words or "закрой приложение" in words or "закрой программу" in words or "закрой прогу" in words or "закрой ок" in words:
         pyautogui.hotkey('alt', 'f4')
@@ -53,6 +78,36 @@ def get_answer(words, engine):
         else:
             print("BOT: Истории нет.")
             speak_interruptible("Истории нет.", mic_index, engine)
+
+    elif "сверни окно" in words or "сверни" in words or "свернуть окно" in words or "бот swear" in words or "сверни ок" in words:
+        active = pygetwindow.getActiveWindow()
+        if active:
+            active.minimize()
+        print("BOT: Сворачиваю открытое окно")
+        speak_interruptible("Сворачиваю открытое окно", mic_index, engine)
+        commandIndex = 9
+
+    elif "сколько время" in words or "время" in words:
+        hour = str(time.localtime().tm_hour)
+        min = str(time.localtime().tm_min)
+        sec = str(time.localtime().tm_sec)
+        
+        if time.localtime().tm_hour < 10:
+            hour = "0" + str(time.localtime().tm_hour)
+
+        if time.localtime().tm_min < 10:
+            min = "0" + str(time.localtime().tm_min)
+
+        if time.localtime().tm_sec < 10:
+            sec = "0" + str(time.localtime().tm_sec)
+        readyTime = hour + ":" + min + ":" + sec
+        print("BOT: " + readyTime)
+        speak_interruptible(readyTime, mic_index, engine)
+
+    elif "кокое сегодня" in words or "дата" in words or "какое сегодня число" in words:
+        print("BOT: " + "{}.{}.{}".format(date.today().day, date.today().month, date.today().year))
+        speak_interruptible(str("{}.{}.{}".format(date.today().day, date.today().month, date.today().year)), mic_index, engine)
+
 
     elif "пока" in words:
         print("BOT: Пока!")
