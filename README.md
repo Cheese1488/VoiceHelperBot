@@ -17,6 +17,10 @@ This is just voice bot for your use!
 > | `Cменить имя`, `смени имя`, `изменить имя`, `измени имя` | Bot change name you can also set several names at once just by writing the names separated by a space without any other characters (бот => Вектор Квас роса) |
 > | `Cпящий режим`, `включи спящий режим` | Your computer will go to sleep mode. |
 > | `отмена`, `отмени` | Cancel your command if you start but don't end give command (example: {YouerBotName}(бот) как меня зовут отмена) - this command will not work |
+> | `Cпасибо`, `спасибки`, `спасибос`, `спасибочки`, `спасибосики`, `cпасиб` | Just say "Не за что" |
+> | `Сверни окно`, `сверни` | Minimizes the open window |
+> | `Сколько время`, `время` | Shows local time |
+> |`Какое сегодня`, `дата`, `какое сегодня число` | Shows the local date |
 
 > [!NOTE]
 > 
@@ -29,4 +33,4 @@ This is just voice bot for your use!
 # All suported languages: 
 - RU
 
-### Bot version: 1.1.3v Alpha
+### Bot version: 1.1.4v Alpha
